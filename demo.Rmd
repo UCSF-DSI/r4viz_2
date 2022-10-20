@@ -1,0 +1,128 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Visualizing Discrete Variables
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+```{r}
+penguins_df <- penguins %>% drop_na()
+penguins_df
+```
+
+## Summarizing Discrete Variables
+
+Use `group_by` and `summarize` to summarize data
+
+```{r}
+penguins_df %>%
+  group_by(species, year) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g),
+    sd_body_mass = sd(body_mass_g)
+  )
+```
+
+## Factors
+
+Use `pull` and `levels` to see ordering of factors
+
+-   strongly disagree
+
+-   disagree
+
+-   neutral
+
+-   agree
+
+-   strongly agree
+
+```{r}
+penguins_df %>%
+  pull(island) %>%
+  levels()
+```
+
+Use `mutate` and `factor(..., levels = c(..))` to change the ordering of factors
+
+```{r}
+penguins_df <- penguins_df %>%
+  mutate(
+    year = factor(year, levels = c(2007, 2008, 2009)),
+    species = factor(species, levels = c("Adelie", "Gentoo", "Chinstrap"))
+  )
+
+penguins_df
+```
+
+## Bar Charts
+
+`geom_bar(..., stat = "identity")`
+
+```{r}
+penguins_df %>%
+  group_by(species) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g),
+    sd_body_mass = sd(body_mass_g)
+  ) %>%
+  ggplot() +
+    geom_bar(
+      mapping = aes(y = species, x = n_penguins),
+      stat = "identity"
+    )
+```
+
+Add `fill` and `position = dodge` to make grouped bar chart
+
+```{r}
+penguins_df %>%
+  group_by(species, year) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g),
+    sd_body_mass = sd(body_mass_g)
+  ) %>%
+  ggplot() +
+    geom_bar(
+      mapping = aes(fill = species, y = n_penguins, x = year),
+      stat = "identity",
+      position = "dodge"
+    )
+```
+
+## Pie Chart
+
+<https://r-graph-gallery.com/piechart-ggplot2.html>
+
+```{r}
+penguins_df %>%
+  group_by(species) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g)
+  )
+```
+
+```{r}
+penguins_df %>%
+  group_by(species) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g)
+  ) %>%
+  ggplot() +
+    geom_bar(
+      mapping = aes(x = " ", fill = species, y = n_penguins),
+      stat = "identity"
+    ) +
+    coord_polar("y", start=0) +
+    theme_void()
+```

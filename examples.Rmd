@@ -1,0 +1,95 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Visualizing Discrete Variables
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+```{r}
+penguins_df <- penguins %>% drop_na()
+penguins_df
+```
+
+## Summarizing Discrete Variables
+
+```{r}
+penguins_df %>%
+  group_by(sex, year) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g)
+  )
+```
+
+## Factors
+
+```{r}
+penguins_df %>%
+  pull(species) %>%
+  levels()
+```
+
+```{r}
+penguins_df <- penguins_df %>%
+  mutate(
+    species = factor(species, levels = c("Adelie", "Chinstrap", "Gentoo")),
+    year = factor(year, levels = c(2009, 2008, 2007))
+  )
+penguins_df
+```
+
+## Bar Charts
+
+```{r}
+penguins_df %>%
+  group_by(species) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g)
+  ) %>%
+  ggplot() + 
+    geom_bar(
+      mapping = aes(y = species, x = n_penguins), 
+      stat = "identity"
+    )
+```
+
+```{r}
+penguins_df %>%
+  group_by(year, species) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g)
+  ) %>%
+  ggplot() + 
+    geom_bar(
+      mapping = aes(y = species, x = mean_body_mass, fill = year),
+      stat = "identity",
+      position = "dodge"
+    )
+```
+
+## Pie Chart
+
+<https://r-graph-gallery.com/piechart-ggplot2.html>
+
+```{r}
+penguins_df %>%
+  group_by(species) %>%
+  summarize(
+    n_penguins = n(),
+    mean_body_mass = mean(body_mass_g)
+  ) %>%
+  ggplot() + 
+    geom_bar(
+      mapping = aes(x = " ", fill = species, y = n_penguins), 
+      stat = "identity"
+    ) + 
+    coord_polar("y", start=0) + 
+    theme_void()
+```
